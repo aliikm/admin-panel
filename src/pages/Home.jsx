@@ -7,6 +7,8 @@ import LoginModal from "../components/LoginModal";
 const Home = () => {
   const [modalSignUp, setModalSignUp] = useState(null);
   const [modallogin, setModallogin] = useState(null);
+  
+
 
   const showsignupmodalHandler = () => {
     setModalSignUp(true);
