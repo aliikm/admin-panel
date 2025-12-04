@@ -32,7 +32,7 @@ const AdminProduct = () => {
         </div>
         
       </div>
-      <DataContext.Provider value={{author : "alikm" ,closeHandler}}>
+      <DataContext.Provider value={{closeHandler}}>
         {modaladdproduct && <Addproduct />}
         
       </DataContext.Provider>
