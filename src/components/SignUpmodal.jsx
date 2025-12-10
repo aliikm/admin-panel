@@ -17,7 +17,7 @@ const mutation = useMutation({
           password: formState.password}).then((res) => res.data),
     onSuccess: (data) => {
       console.log("ثبت‌نام موفق:", data);
-      setUserId(data.id); // ذخیره آیدی برگشتی
+      setUserId(data.id);   
       setServerMessage("ثبت‌نام با موفقیت انجام شد");
     },
     onError: (error) => {

@@ -1,16 +1,63 @@
-import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useContext } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useContext, useState } from "react";
 import { DataContext } from "../pages/AdminProduct";
-import React from "react";
+import { registerproduct } from "../helper/schema";
+import { yupResolver } from "@hookform/resolvers/yup";
+import axios from "axios";
 import styles from "../module.css/addproduct.module.css";
+import { data } from "react-router-dom";
+
 const Addproduct = () => {
-  const { register, handleSubmit } = useForm();
+  const { addProduct, closeHandler } = useContext(DataContext);
 
-  const { closeHandler } = useContext(DataContext);
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(registerproduct),
+  });
 
-  const onSubmit = (data) => {
-    console.log("formdata", data);
+  const token = localStorage.getItem("token");
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: async (values) => {
+      const res = await axios.post(
+        "http://localhost:3000/products",
+        {
+          productname: values.productname,
+          inventory: values.inventory,
+          price: values.price,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return res.data;
+    },
+    onSuccess: (data, variables) => {
+      console.log("محصول ثبت شد ✅", data);
+      console.log("اطلاعات ارسال‌شده:", variables);
+      const fullProduct = {
+        ...variables,
+        id: data.id,
+      };
+      addProduct(fullProduct); // اضافه به لیست
+      closeHandler(); // بستن مودال
+      reset(); // پاک کردن فرم
+      queryClient.invalidateQueries("products");
+    },
+    onError: (error) => {
+      console.error("خطا:", error.response?.data);
+    },
+  });
+  const onSubmit = (formData) => {
+    mutation.mutate(formData);
   };
 
   return (
@@ -18,21 +65,31 @@ const Addproduct = () => {
       <div className={styles.container}>
         <div className={styles.addproductmodal}>
           <p>ایجاد محصول جدید</p>
-          <form action="" onSubmit={handleSubmit(onSubmit)}>
-            <label htmlFor="">نام کالا</label>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <label htmlFor="productname">نام کالا</label>
             <input
               type="text"
               placeholder="نام کالا"
-              {...register("نام کالا")}
+              name="productname"
+              {...register("productname")}
             />
-            <label htmlFor="">تعداد موجودی</label>
+            {errors.productname && <p>{errors.productname.message}</p>}
+            <label htmlFor="inventory">تعداد موجودی</label>
             <input
-              type="text"
+              type="number"
+              name="inventory"
               placeholder="تعداد موجودی"
-              {...register("تعداد موجودی")}
+              {...register(" inventory", { valueAsNumber: true })}
             />
-            <label htmlFor="">قیمت</label>
-            <input type="text" placeholder="قیمت" {...register("قیمت")} />
+            {errors.inventory && <p>{errors.inventory.message}</p>}
+            <label htmlFor="price">قیمت</label>
+            <input
+              type="number"
+              placeholder="قیمت"
+              name="price"
+              {...register("price")}
+            />
+            {errors.price && <p>{errors.price.message}</p>}
             <div className={styles.buttongroup}>
               <button
                 type="button"
@@ -47,12 +104,13 @@ const Addproduct = () => {
 
               <button
                 type="submit"
+                disabled={mutation.isLoading}
                 style={{
                   background: "rgba(85, 163, 240, 1)",
                   color: "rgba(255, 255, 255, 1)",
                 }}
               >
-                ایجاد
+                {mutation.isLoading ? "در حال ارسال..." : "ثبت محصول"}
               </button>
             </div>
           </form>

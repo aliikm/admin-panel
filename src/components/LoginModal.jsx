@@ -15,20 +15,18 @@ const LoginModal = ({ modallogin, setModallogin }) => {
       axios
         .post("http://localhost:3000/auth/login", data)
         .then((res) => res.data),
- onSuccess: (data) => {
-  console.log("✅ ورود موفق:", data);
+    onSuccess: (data) => {
+      console.log("✅ ورود موفق:", data);
 
-  localStorage.setItem("token", data.token);
+      localStorage.setItem("token", data.token);
 
-  // استخراج اطلاعات از توکن
-  const decoded = jwtDecode(data.token);
-  console.log("اطلاعات داخل توکن:", decoded);
+      const decoded = jwtDecode(data.token);
+      console.log("اطلاعات داخل توکن:", decoded);
 
-  // ذخیره نام کاربر
-  localStorage.setItem("username", decoded.username);
+      localStorage.setItem("username", decoded.username);
 
-  navigate("/adminproduct");
-}
+      navigate("/adminproduct");
+    },
   });
 
   const onSubmit = (data) => {

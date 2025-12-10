@@ -3,18 +3,36 @@ import { createContext } from "react";
 import { useState } from "react";
 import styles from "../module.css/adminpage.module.css";
 import Addproduct from "../components/Addproduct";
+import ProductList from "../components/ProductList";
 
 export const DataContext = createContext();
+
 const AdminProduct = () => {
   const [modaladdproduct, setModaladdproduct] = useState(null);
+  const [producttabel, setProducttabel] = useState([]);
+
+  const addProduct = (newProduct) => {
+    setProducttabel((prev) => [...prev, newProduct]);
+  };
+
   const username = localStorage.getItem("username");
   console.log("نام کاربر", username);
   function closeHandler() {
     setModaladdproduct(false);
-    console.log("ok");
   }
+
+  
   return (
-    <>
+    <DataContext.Provider
+      value={{
+        closeHandler,
+        modaladdproduct,
+        setModaladdproduct,
+        producttabel,
+        addProduct,
+        setProducttabel,
+      }}
+    >
       <div className={styles.container}>
         <div className={styles.searchcontainer}>
           <div className={styles.search}>
@@ -25,9 +43,7 @@ const AdminProduct = () => {
           <div className={styles.user}>
             <div>
               <p></p>
-              <p> سلام {username ? username : "مهمان"} 👋
-                مدیر
-              </p>
+              <p> سلام {username ? username : "مهمان"} 👋 مدیر</p>
             </div>
           </div>
         </div>
@@ -36,10 +52,10 @@ const AdminProduct = () => {
           <p>مدیریت کالا</p>
         </div>
       </div>
-      <DataContext.Provider value={{ closeHandler }}>
-        {modaladdproduct && <Addproduct />}
-      </DataContext.Provider>
-    </>
+
+      {modaladdproduct && <Addproduct />}
+      <ProductList />
+    </DataContext.Provider>
   );
 };
 
